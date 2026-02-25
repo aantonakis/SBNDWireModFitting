@@ -10,7 +10,7 @@
 #include "TH2.h"
 #include "TH1.h"
 #include "TGraph2DErrors.h"
-#include "../../../include_wire/Fitting.h"
+#include "../../include_wire/Fitting.h"
 
 const UInt_t kNplanes = 3;
 const UInt_t kNTPCs   = 2;
