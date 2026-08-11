@@ -20,14 +20,14 @@ struct BinRegion {
     int idx, X, x1, x2, y1, y2;
 };
 
-void make_xyz_splines_simple(const char* mc_file,
+void make_xyz_splines_simple_nomulti(const char* mc_file,
                                 const char* data_file,
                                 const char* output_file,
                                 const char* bin_file, int IDX)
 {
     gROOT->SetBatch(kTRUE);
     TH1::AddDirectory(kFALSE);
-    ROOT::EnableImplicitMT();  // enable multithreading
+    //ROOT::EnableImplicitMT();  // enable multithreading
 
     // Open bin file and preload TNtuple into memory
     TFile fbin(bin_file, "READ");
@@ -164,7 +164,7 @@ void make_xyz_splines_simple(const char* mc_file,
 
         {
             std::lock_guard<std::mutex> lock(result_mutex);
-            results[0].push_back({R.X, xcen, ycen,
+            results[R.idx].push_back({R.X, xcen, ycen,
                                       itm_result_mc[0], itm_result_data[0], ratio,
                                       itm_result_mc[1], itm_result_data[1]});
 
@@ -173,7 +173,7 @@ void make_xyz_splines_simple(const char* mc_file,
               //std::cout << "On Left" << std::endl;
               double xcen_t = xcen - xerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen,
+              results[R.idx].push_back({R.X, xcen_t, ycen,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
               
@@ -182,7 +182,7 @@ void make_xyz_splines_simple(const char* mc_file,
               //std::cout << "On Right" << std::endl;
               double xcen_t = xcen + xerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen,
+              results[R.idx].push_back({R.X, xcen_t, ycen,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
 
@@ -191,7 +191,7 @@ void make_xyz_splines_simple(const char* mc_file,
               //std::cout << "On Top" << std::endl;
               double ycen_t = ycen + yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen, ycen_t,
+              results[R.idx].push_back({R.X, xcen, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
              
@@ -200,7 +200,7 @@ void make_xyz_splines_simple(const char* mc_file,
               //std::cout << "On Bottom" << std::endl;
               double ycen_t = ycen - yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen, ycen_t,
+              results[R.idx].push_back({R.X, xcen, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
             }
@@ -208,7 +208,7 @@ void make_xyz_splines_simple(const char* mc_file,
               double xcen_t = xcen + xerr;
               double ycen_t = ycen - yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen_t,
+              results[R.idx].push_back({R.X, xcen_t, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
 
@@ -217,7 +217,7 @@ void make_xyz_splines_simple(const char* mc_file,
               double xcen_t = xcen + xerr;
               double ycen_t = ycen + yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen_t,
+              results[R.idx].push_back({R.X, xcen_t, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
 
@@ -226,7 +226,7 @@ void make_xyz_splines_simple(const char* mc_file,
               double xcen_t = xcen - xerr;
               double ycen_t = ycen - yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen_t,
+              results[R.idx].push_back({R.X, xcen_t, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
 
@@ -235,7 +235,7 @@ void make_xyz_splines_simple(const char* mc_file,
               double xcen_t = xcen - xerr;
               double ycen_t = ycen + yerr;
               //std::lock_guard<std::mutex> lock(result_mutex);
-              results[0].push_back({R.X, xcen_t, ycen_t,
+              results[R.idx].push_back({R.X, xcen_t, ycen_t,
                                         itm_result_mc[0], itm_result_data[0], ratio,
                                         itm_result_mc[1], itm_result_data[1]});
      
@@ -301,7 +301,7 @@ void make_xyz_splines_simple(const char* mc_file,
         splines_2d[i]->GetYaxis()->SetTitle(haxes->GetYaxis()->GetTitle());
      }
      std::cout << "Loop over regions and set points" << std::endl;
-     for (auto& r : results[0]) {
+     for (auto& r : results[IDX]) {
             int X;
             double x, y, mpv_mc, mpv_data, ratio, err_mc, err_data;
             std::tie(X, x, y, mpv_mc, mpv_data, ratio, err_mc, err_data) = r;

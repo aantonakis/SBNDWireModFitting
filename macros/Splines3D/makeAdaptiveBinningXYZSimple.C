@@ -119,6 +119,10 @@ void makeAdaptiveBinningFineXYZSimple(const char* input_file, const char* output
 
         TH1D* hx = hTrk->Projection(0);
         for (int xbin = 1; xbin < hx->GetNbinsX()+1; ++xbin) {
+
+          if (idx < 3 && hx->GetBinCenter(xbin) > 0) continue;
+          if (idx > 2 && hx->GetBinCenter(xbin) < 0) continue;
+
           if (hx->GetBinContent(xbin) < 100000) continue;
 
           hTrk->GetAxis(0)->SetRange(xbin, xbin);
@@ -136,7 +140,7 @@ void makeAdaptiveBinningFineXYZSimple(const char* input_file, const char* output
         std::cout << "Made it through splitting algorithm!" << std::endl;
 
 
-        TH2D* h_test = (TH2D*)h->Clone(Form("h%d", idx));
+        TH2D* h_test = (TH2D*)h->Clone(Form("h%d_%d", idx, xbin));
         h_test->Reset();
         for (const auto& r : regions) {
           int y1 = r.y1;
